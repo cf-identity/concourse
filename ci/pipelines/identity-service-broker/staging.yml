@@ -1,0 +1,44 @@
+---
+jobs:
+- name: job-deploy-app
+  public: true
+  serial: true
+  plan:
+  - get: resource-identity-service-broker
+  - get: concourse
+  - put: resource-deploy-identity-service-broker
+  - task: build
+      file: concourse/ci/identity-service-broker/build.yml
+    params:
+      manifest: resource-identity-service-broker/manifest.yml
+      environment_variables:
+        DOMAIN: {{domain}}
+        SCHEME: https
+        SKIP_SSL_VALIDATION: false
+        IDENTITY_CLIENTSECRET: {{identity-client-secret}}
+        BROKER_USER: {{broker-user}}
+        BROKER_PASSWORD: {{broker-password}}
+
+resources:
+  - name: resource-identity-service-broker
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/identity-service-broker.git
+      branch: master
+      private_key: {{identity-service-broker-private-key}}
+  - name: concourse
+    type: git
+    source:
+      uri: git@github.com:cf-identity/concourse.git
+      branch: develop
+      private_key: {{concourse-private-key}}
+  - name: resource-deploy-identity-service-broker
+    type: cf
+    source:
+      api: {{cf-api}}
+      username: {{cf-user}}
+      password: {{cf-password}}
+      organization: {{identity-org}}
+      space: {{identity-space}}
+      skip_cert_check: false
+

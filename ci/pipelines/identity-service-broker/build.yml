@@ -1,0 +1,8 @@
+platform: linux
+image: docker.gocd.cf-app.com:5000/identity/identity-service-broker-image
+
+inputs:
+  - name: identity-service-broker
+
+run:
+  path: concourse/ci/scripts/identity-service-broker/build
